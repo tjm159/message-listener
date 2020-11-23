@@ -1,5 +1,5 @@
 # Message Listener
-Message Listener is a program used to give message statistic in 
+Message Listener is a program used to give message statistic for 
 [RNEL Dragonfly](https://github.com/pitt-rnel/rnel_dragonfly).
 
 ## Requirements
