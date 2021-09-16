@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import argparse
 import importlib
@@ -9,6 +10,13 @@ import numpy as np
 def clear_console():
     os.system('cls' if os.name=='nt' else 'clear')
 
+def check_alerts(msg_alerts, msg_times):
+    # Check if any alert values are zero
+    for alert in msg_alerts:
+        times = msg_times.get(alert)
+        if not times:
+            sys.stdout.write('\a')
+            break
 
 def format_output(msg_type, times):
     if np.size(times) >= 2:
@@ -25,7 +33,7 @@ def format_output(msg_type, times):
         return f'{msg_type}: Count: {np.size(times)}'
 
 
-def run(msg_sys, msg_sys_mod, msg_defs, update_rate):
+def run(msg_sys, msg_sys_mod, msg_defs, msg_alerts, update_rate):
 
     # Get all message types from dragonfly and message definitions
     msg_types = { **{getattr(msg_defs, item) : item 
@@ -60,6 +68,9 @@ def run(msg_sys, msg_sys_mod, msg_defs, update_rate):
 
         if (time.perf_counter() - last_update) > update_rate: 
             clear_console()
+            if msg_alerts:
+                check_alerts(msg_alerts, msg_times)
+
             if msg_times:
                 output = '\n'.join([format_output(key, value) 
                                     for (key, value) in msg_times.items()])
@@ -88,6 +99,10 @@ def parse_args():
                         type=str,
                         default='HX_message_defs',
                         help='Message definitions module')
+    parser.add_argument('-a', '--alerts',
+                        nargs='*',
+                        default=None,
+                        help='Message definition alerts')
     return parser.parse_args()
 
 
@@ -114,4 +129,5 @@ if __name__ == '__main__':
    run(msg_sys=mods['msg_sys'],
        msg_sys_mod=mods['msg_sys_mod'],
        msg_defs=mods['msg_defs'],
+       msg_alerts=args.alerts,
        update_rate=args.rate) 
