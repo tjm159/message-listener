@@ -33,7 +33,7 @@ def format_output(msg_type, times):
         return f'{msg_type}: Count: {np.size(times)}'
 
 
-def run(msg_sys, msg_sys_mod, msg_defs, msg_alerts, update_rate):
+def run(mm_ip, msg_sys, msg_sys_mod, msg_defs, msg_alerts, update_rate):
 
     # Get all message types from dragonfly and message definitions
     msg_types = { **{getattr(msg_defs, item) : item 
@@ -44,7 +44,7 @@ def run(msg_sys, msg_sys_mod, msg_defs, msg_alerts, update_rate):
     msg_times = dict()
 
     mod = msg_sys_mod(0, 0)
-    mod.ConnectToMMM('localhost:7111')
+    mod.ConnectToMMM(mm_ip)
     mod.Subscribe(msg_sys.ALL_MESSAGE_TYPES)
 
     print('Message Listener is running...')
@@ -86,6 +86,10 @@ def run(msg_sys, msg_sys_mod, msg_defs, msg_alerts, update_rate):
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--mm_ip',
+                        type=str,
+                        default='localhost:7111',
+                        help='Message manager IP address and port')                        
     parser.add_argument('-r', '--rate', 
                         type=int,
                         default=5,
@@ -126,7 +130,8 @@ def import_mods(args):
 if __name__ == '__main__':
    args = parse_args()
    mods = import_mods(args=args)
-   run(msg_sys=mods['msg_sys'],
+   run(mm_ip=args.mm_ip,
+       msg_sys=mods['msg_sys'],
        msg_sys_mod=mods['msg_sys_mod'],
        msg_defs=mods['msg_defs'],
        msg_alerts=args.alerts,
